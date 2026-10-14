@@ -1,6 +1,6 @@
 import { cargar } from "@/lib/cargar";
 import { fases, hastaDonde, usoSemanal, FASES, NOMBRE, UMBRAL, maxFecha } from "@/lib/analisis";
-import { f0, f1, p0, fmtDia, pts } from "@/lib/formato";
+import { f0, f1, p0, pts } from "@/lib/formato";
 import BarraH from "@/components/BarraH";
 import Grafica from "@/components/Grafica";
 import Pildoras from "@/components/Pildoras";
