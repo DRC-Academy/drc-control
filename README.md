@@ -14,9 +14,9 @@ Sin base de datos: el estado del panel y las métricas viven en la rama `estado`
 
 ## Desplegar
 
-1. En Vercel: Add New, Project, Import desde GitHub, `drcacademycourses/drc-control`. Framework Next.js, sin cambios.
+1. En Vercel: Add New, Project, Import desde GitHub, `DRC-Academy/drc-control`. Framework Next.js, sin cambios.
 2. Pegar las variables de entorno de arriba y desplegar (o volver a desplegar tras pegarlas).
-3. Entrar en la URL con la clave de mandos.
+3. Entrar en https://drc-control.vercel.app con la clave de mandos.
 
 Cada push a `main` se despliega solo.
 
