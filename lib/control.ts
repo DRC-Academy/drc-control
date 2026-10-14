@@ -23,7 +23,7 @@ export type Correccion = { id: string; at: string; por: string; texto: string; e
 export type Correcciones = { items: Correccion[] };
 
 export const REGLAS: [string, string][] = [
-  ["pregunta_ia", "El lead pregunta si habla con una IA o un bot: el bot lo reconoce con sinceridad y pasa la conversación a ventas"],
+  ["pregunta_ia", "El lead pregunta si habla con una IA o con una persona: el bot no contesta nada (ni lo admite ni lo niega) y pasa la conversación a ventas en ese momento"],
   ["pide_persona", "El lead pide hablar con una persona"],
   ["fase_tope", "Llega a la fase tope (siempre)"],
   ["objecion", "Aparece una objeción: precio, confianza, tiempo, lo tiene que pensar"],
@@ -33,7 +33,7 @@ export const REGLAS: [string, string][] = [
 ];
 
 export const CONTROL_DEFECTO: Control = {
-  modo: "propone", fase_tope: "explicacion", grupo_pct: 20,
+  modo: "propone", fase_tope: "precio", grupo_pct: 20,
   programacion: { tipo: "franjas", franjas: [{ dias: [1, 2, 3, 4, 5, 6], desde: "08:30", hasta: "21:00" }], zona: "Europe/Madrid" },
   reglas: { pregunta_ia: true, pide_persona: true, fase_tope: true, objecion: true, guardia: true, sin_dato: true, enfado: true },
 };
