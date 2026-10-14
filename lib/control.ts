@@ -89,17 +89,21 @@ export function describeCambio(a: Control | null, b: Control): string {
 export type EstadoPanel = { control: Control | null; sha: string | null; aplicado: Aplicado | null; historial: Historial; correcciones: Correcciones; error: string | null };
 
 async function cargarEstado(): Promise<EstadoPanel> {
+  const [c, a, h, r] = await Promise.all([
+    leerJson<Control>("control.json"), leerJson<Aplicado>("control-aplicado.json"),
+    leerJson<Historial>("control-historial.json"), leerJson<Correcciones>("control-correcciones.json"),
+  ]);
+  return { control: c?.data ?? null, sha: c?.sha ?? null, aplicado: a?.data ?? null, historial: h?.data ?? { items: [] }, correcciones: r?.data ?? { items: [] }, error: null };
+}
+const leerEstadoPanelCache = unstable_cache(cargarEstado, ["panel"], { revalidate: 60, tags: ["control"] });
+// Un fallo de GitHub no se cachea: se enseña y se vuelve a intentar en la siguiente carga.
+export async function leerEstadoPanel(): Promise<EstadoPanel> {
   try {
-    const [c, a, h, r] = await Promise.all([
-      leerJson<Control>("control.json"), leerJson<Aplicado>("control-aplicado.json"),
-      leerJson<Historial>("control-historial.json"), leerJson<Correcciones>("control-correcciones.json"),
-    ]);
-    return { control: c?.data ?? null, sha: c?.sha ?? null, aplicado: a?.data ?? null, historial: h?.data ?? { items: [] }, correcciones: r?.data ?? { items: [] }, error: null };
+    return await leerEstadoPanelCache();
   } catch (e) {
     return { control: null, sha: null, aplicado: null, historial: { items: [] }, correcciones: { items: [] }, error: (e as Error).message };
   }
 }
-export const leerEstadoPanel = unstable_cache(cargarEstado, ["panel"], { revalidate: 60, tags: ["control"] });
 
 export async function guardarControl(nuevo: Control, cambio: string, por: string): Promise<void> {
   const actual = await leerJson<Control>("control.json");

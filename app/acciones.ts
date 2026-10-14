@@ -16,7 +16,7 @@ export async function entrar(formData: FormData): Promise<void> {
   if (!token) redirect("/entrar?error=2");
   const c = await cookies();
   c.set("drc_sesion", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 30 * 86400 });
-  redirect(a.startsWith("/") ? a : "/salud");
+  redirect(a.startsWith("/") && !a.startsWith("//") ? a : "/salud");
 }
 
 export async function salir(): Promise<void> {
@@ -32,5 +32,5 @@ export async function refrescar(ruta: string): Promise<void> {
   revalidateTag("metricas");
   revalidateTag("control");
   revalidateTag("alumnos");
-  redirect(ruta.startsWith("/") ? ruta : "/salud");
+  redirect(ruta.startsWith("/") && !ruta.startsWith("//") ? ruta : "/salud");
 }

@@ -38,7 +38,7 @@ const WD: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat
 export function madridPartes(d: Date): PartesMadrid {
   const p = new Intl.DateTimeFormat("en-US", {
     timeZone: "Europe/Madrid", weekday: "short", year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", hour12: false,
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
   }).formatToParts(d);
   const o: Record<string, string> = {};
   p.forEach((x) => { o[x.type] = x.value; });
