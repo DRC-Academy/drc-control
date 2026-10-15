@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { cargar } from "@/lib/cargar";
 import { verificarSesion } from "@/lib/sesion";
-import { CONTROL_DEFECTO, REGLAS, programada, resumen, describeProg } from "@/lib/control";
+import { CONTROL_DEFECTO, REGLAS, FASES_TOPE_OPCIONES, programada, resumen, describeProg, describeFase } from "@/lib/control";
 import { MAX_FRANJAS, HORARIO_BOT, caeFueraDeHorario } from "@/lib/programacion";
 import { maxFecha } from "@/lib/analisis";
 import { DIAS_N, fmtFecha, madridPartes, aDatetimeLocal } from "@/lib/formato";
@@ -62,7 +62,7 @@ export default async function Panel({ searchParams }: { searchParams: Promise<Re
                 {c.modo === "apagado"
                   ? "Ni sugiere ni responde."
                   : encendido
-                    ? "El bot contestará solo al " + (c.grupo_pct ?? 0) + " % de los leads nuevos, hasta " + (c.fase_tope === "precio" ? "el precio" : "la explicación") + ", y luego pasa el chat a una persona. " + describeProg(c) + ". Ahora mismo: " + (pa.activo ? "ACTIVO (" + pa.motivo + ")." : "fuera de programación (" + pa.motivo + "), solo sugiere.")
+                    ? "El bot contestará solo al " + (c.grupo_pct ?? 0) + " % de los leads nuevos, hasta " + describeFase(c.fase_tope) + " (incluida), y luego pasa el chat a una persona. " + describeProg(c) + ". Ahora mismo: " + (pa.activo ? "ACTIVO (" + pa.motivo + ")." : "fuera de programación (" + pa.motivo + "), solo sugiere.")
                     : "El bot solo sugiere la respuesta y una persona la envía, como hoy."}
               </p>
             </div>
@@ -155,8 +155,7 @@ export default async function Panel({ searchParams }: { searchParams: Promise<Re
           <div className="ctl">
             <label>Fase tope
               <select name="fase_tope" defaultValue={c.fase_tope} disabled={dis}>
-                <option value="explicacion">Explicación (el precio lo da una persona)</option>
-                <option value="precio">Precio (el bot da el precio y luego entra una persona)</option>
+                {FASES_TOPE_OPCIONES.map(([k, t]) => <option key={k} value={k}>{t}</option>)}
               </select>
             </label>
             <label>Grupo de control: % de los leads nuevos<input type="number" name="grupo_pct" min={0} max={100} step={5} defaultValue={c.grupo_pct ?? 20} disabled={dis} /></label>

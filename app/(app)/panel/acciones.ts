@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { verificarSesion } from "@/lib/sesion";
 import { leerJson } from "@/lib/github";
-import { guardarControl, guardarCorreccion, describeCambio, CONTROL_DEFECTO, REGLAS, type Control } from "@/lib/control";
+import { guardarControl, guardarCorreccion, describeCambio, CONTROL_DEFECTO, REGLAS, FASES_TOPE, type Control, type FaseTope } from "@/lib/control";
 import { MAX_FRANJAS, esHora, sigueVigente, type Franja, type Programacion } from "@/lib/programacion";
 import { madridEn, madridPartes } from "@/lib/formato";
 
@@ -71,7 +71,7 @@ export async function guardarPanel(formData: FormData): Promise<void> {
   const nuevo: Control = { ...base };
 
   const ft = String(formData.get("fase_tope") || base.fase_tope);
-  nuevo.fase_tope = ft === "explicacion" ? "explicacion" : "precio";
+  nuevo.fase_tope = (FASES_TOPE as readonly string[]).includes(ft) ? (ft as FaseTope) : base.fase_tope;
   nuevo.grupo_pct = Math.max(0, Math.min(100, Math.round(Number(formData.get("grupo_pct")) || 0)));
   const reglas: Record<string, boolean> = {};
   REGLAS.forEach(([k]) => { reglas[k] = k === "fase_tope" ? true : formData.get("regla_" + k) === "on"; });
