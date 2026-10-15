@@ -2,7 +2,7 @@
 // Solo en el servidor. Nunca se leen propuestas/ (memoria de los chats): solo metricas/ y los archivos de control.
 import "server-only";
 
-const API = "https://api.github.com";
+const API = process.env.GITHUB_API_URL || "https://api.github.com";
 
 export function repo(): string {
   return process.env.REPO_BOT || "drcacademycourses/drc-respond";

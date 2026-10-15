@@ -31,3 +31,11 @@ npm install
 cp .env.example .env.local   # y rellenar
 npm run dev
 ```
+
+## Respuestas automáticas y programación (15/10/2026)
+
+El panel tiene un botón para encender y apagar las respuestas automáticas, y la programación admite: la próxima hora, 2 o 4 horas, hasta las 21:00 de hoy, el fin de semana entero, un tramo entre dos fechas con hora (ventana), un horario por días con hasta 3 franjas (también de noche, cruzando la medianoche) y siempre. Todo en hora de Madrid. Encender pide marcar una casilla de confirmación.
+
+Encender el panel NO hace que el bot envíe mensajes: el envío real lo bloquea el interruptor de seguridad COPILOTO_AUTONOMO del repositorio del bot, que solo se pone en activo en GitHub por decisión de Diego. Con el valor prueba, el bot solo deja el comentario Habría enviado. El panel enseña ese estado con el acuse del bot (control-aplicado.json).
+
+La lógica de horarios está en lib/programacion.ts y tiene pruebas (npm test). Debe dar el mismo resultado que programacion_activa del bot (drc-respond, copiloto.py).

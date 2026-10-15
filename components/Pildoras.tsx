@@ -22,6 +22,8 @@ export default function Pildoras({ control, aplicado, sha, maxFecha }: { control
     if (c.modo === "autonomo") { const pa = programada(c, ahora); items.push({ t: "Modo autónomo ahora: " + (pa.activo ? "activo, " + pa.motivo : "inactivo, " + pa.motivo), cls: pa.activo ? "ok" : "" }); }
     const leido = aplicado && sha && aplicado.sha === sha;
     items.push({ t: leido ? "Leído por el bot" : "Pendiente: el bot aún no ha leído esta versión", cls: leido ? "ok" : "aviso" });
+    if (aplicado && typeof aplicado.autonomo_disponible === "boolean") items.push(aplicado.autonomo_disponible ? { t: "Envío real ACTIVADO en el bot", cls: "mal" } : { t: "Envío real bloqueado (seguro)", cls: "ok" });
+    if (aplicado?.parada) items.push({ t: "Parada automática del modo autónomo", cls: "mal" });
     void normal;
   } else {
     items.push({ t: "Sin control.json: el bot funciona en modo propone", cls: "" });

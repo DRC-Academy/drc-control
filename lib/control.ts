@@ -2,11 +2,11 @@
 import "server-only";
 import { unstable_cache, revalidateTag } from "next/cache";
 import { leerJson, escribirJson } from "./github";
-import { DIAS_N, fmtFecha, madridPartes } from "./formato";
+import { fmtFecha } from "./formato";
+import { activa, describir, type Franja, type Programacion } from "./programacion";
 import { NOMBRE } from "./analisis";
 
-export type Franja = { dias: number[]; desde: string; hasta: string };
-export type Programacion = { tipo: "siempre" | "hasta" | "franjas" | "apagado"; hasta?: string; franjas?: Franja[]; zona: "Europe/Madrid"; q?: string };
+export type { Franja, Programacion };
 export type Control = {
   modo: "propone" | "autonomo" | "apagado";
   fase_tope: "explicacion" | "precio";
@@ -17,7 +17,7 @@ export type Control = {
   actualizado?: { at: string; por: string };
   nota?: string;
 };
-export type Aplicado = { sha?: string; leido_en?: string; modo_efectivo?: string; programacion_activa?: boolean; autonomo_disponible?: boolean };
+export type Aplicado = { sha?: string; leido_en?: string; modo_efectivo?: string; programacion_activa?: boolean; autonomo_disponible?: boolean; parada?: { desde?: string; motivo?: string } };
 export type Historial = { items: { at: string; por: string; cambio: string }[] };
 export type Correccion = { id: string; at: string; por: string; texto: string; estado: "pendiente" | "aplicada" };
 export type Correcciones = { items: Correccion[] };
@@ -39,31 +39,13 @@ export const CONTROL_DEFECTO: Control = {
 };
 
 export function programada(c: Control, ahora: Date): { activo: boolean; motivo: string } {
-  const pr = c.programacion || { tipo: "apagado" };
   if (c.modo !== "autonomo") return { activo: false, motivo: c.modo === "apagado" ? "el bot está apagado" : "el bot está en modo propone" };
-  if (pr.tipo === "siempre") return { activo: true, motivo: "siempre" };
-  if (pr.tipo === "apagado") return { activo: false, motivo: "parado" };
-  if (pr.tipo === "hasta") {
-    const h = new Date(pr.hasta || "");
-    if (Number.isNaN(h.getTime())) return { activo: false, motivo: "fecha no válida" };
-    return h > ahora ? { activo: true, motivo: "hasta las " + fmtFecha(pr.hasta) } : { activo: false, motivo: "terminó el " + fmtFecha(pr.hasta) };
-  }
-  if (pr.tipo === "franjas") {
-    const m = madridPartes(ahora);
-    const f = (pr.franjas || []).find((x) => (x.dias || []).includes(m.wd) && x.desde <= m.hm && m.hm < x.hasta);
-    return f ? { activo: true, motivo: "franja de " + f.desde + " a " + f.hasta } : { activo: false, motivo: "fuera de franja" };
-  }
-  return { activo: false, motivo: "sin programación" };
+  return activa(c.programacion, ahora);
 }
 
 export function describeProg(c: Control): string {
-  const pr = c.programacion || { tipo: "apagado" };
   if (c.modo !== "autonomo") return "Sin modo autónomo";
-  if (pr.tipo === "siempre") return "Siempre (dentro del horario del bot)";
-  if (pr.tipo === "apagado") return "Parado";
-  if (pr.tipo === "hasta") return "Hasta el " + fmtFecha(pr.hasta);
-  if (pr.tipo === "franjas") return (pr.franjas || []).map((f) => (f.dias || []).map((d) => DIAS_N[d]).join(", ") + " de " + f.desde + " a " + f.hasta).join("; ") || "Sin franjas";
-  return "Sin programación";
+  return describir(c.programacion);
 }
 
 export function resumen(c: Control | null): string {
