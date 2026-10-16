@@ -56,18 +56,32 @@
 /* embudo */
 .titular{margin:0;font-size:1.02rem;line-height:1.4}
 .titular b{font-weight:650}
-.funnel{display:flex;flex-direction:column}
-.f-fila{display:grid;grid-template-columns:5.2rem 1fr 3.4rem;gap:10px;align-items:center}
+.cab-sec{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.cab-sec .suave{white-space:nowrap}
+.funnel{display:flex;flex-direction:column;gap:3px}
+.f-fila{display:grid;grid-template-columns:5.2rem 1fr 3.4rem;gap:10px;align-items:center;height:42px}
 .f-nombre{font-size:.9rem}
-.f-pct{text-align:right;font-weight:650;font-variant-numeric:tabular-nums;font-size:.95rem}
-.f-pista{display:flex;justify-content:center;height:34px}
-.f-barra{display:block;height:100%;border-radius:8px;background:var(--acento);min-width:6px}
-.f-compran .f-barra{background:var(--ok)}
-.f-con{height:18px}
-.f-puente{height:100%;background:color-mix(in srgb,var(--acento) 20%,transparent)}
-.f-pasa{text-align:right;font-size:.74rem;color:var(--fg2);white-space:nowrap}
-.f-con.peor .f-puente{background:color-mix(in srgb,var(--mal) 42%,transparent)}
-.f-con.peor .f-pasa{color:var(--mal);font-weight:650}
+.f-pct{text-align:right;font-weight:650;font-variant-numeric:tabular-nums;font-size:1rem}
+.f-trozo{height:100%;background:var(--acento);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;font-weight:700}
+.f-trozo.fuga{background:var(--mal)}
+.f-trozo.compran{background:var(--ok)}
+
+/* hasta dónde puede responder solo */
+.grande-texto{margin:0;font-size:2rem;line-height:1.1;letter-spacing:-.02em;font-weight:500}
+.grande-texto b{font-weight:700}
+.aut{display:flex;flex-direction:column;gap:9px}
+.a-fila{display:grid;grid-template-columns:5.6rem 1fr 4.6rem;gap:10px;align-items:center;font-size:.9rem}
+.a-nombre{white-space:nowrap}
+.a-nombre em{font-style:normal;font-size:.68rem;font-weight:650;letter-spacing:.05em;text-transform:uppercase;margin-left:6px;padding:1px 6px;border-radius:999px;background:var(--fg);color:var(--bg)}
+.a-pista{position:relative;height:12px;border-radius:999px;background:var(--rejilla)}
+.a-pista i{display:block;height:100%;border-radius:999px;background:var(--gris)}
+.a-pista s{position:absolute;top:-4px;bottom:-4px;width:0;border-left:2px dashed var(--ref)}
+.a-fila.lista .a-pista i{background:var(--ok)}
+.a-fila.falla .a-pista i{background:var(--mal)}
+.a-fila.falla .a-nombre,.a-fila.falla .a-pct{color:var(--mal);font-weight:650}
+.a-fila.despues .a-nombre,.a-fila.despues .a-pct,.a-fila.pocos .a-nombre,.a-fila.pocos .a-pct{color:var(--fg2)}
+.a-pct{text-align:right;font-weight:650;font-variant-numeric:tabular-nums}
+.a-fila.pocos .a-pct{font-weight:400;font-size:.78rem}
 .sep{border-top:1px solid var(--linea);padding-top:14px;display:flex;flex-direction:column;gap:3px}
 .lineas{display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:.98rem}
 .lineas b{font-weight:650;font-variant-numeric:tabular-nums}
@@ -126,5 +140,7 @@
 @media (max-width:420px){
   .f-fila{grid-template-columns:4.6rem 1fr 3.1rem;gap:8px}
   .f-nombre{font-size:.84rem}
+  .a-fila{grid-template-columns:5.9rem 1fr 3.4rem;gap:8px;font-size:.84rem}
+  .grande-texto{font-size:1.7rem}
   .num{font-size:2.5rem}
 }

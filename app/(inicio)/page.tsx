@@ -14,6 +14,8 @@ import BotonConfirmar from "@/components/BotonConfirmar";
 import AutoRefresco from "@/components/AutoRefresco";
 import Flash from "@/components/Flash";
 import Funnel from "@/components/Funnel";
+import Autonomia from "@/components/Autonomia";
+import { autonomia } from "@/lib/autonomia";
 import { cambiarEstado } from "./acciones";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +46,7 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
   const ci = cierre(filas, alumnos);
   const em = embudo(filas, alumnos);
   const rp = respuestaPersonas(filas);
+  const au = autonomia(filas);
   const encendido = c.modo === "autonomo";
   const apagado = c.modo === "apagado";
   const ok = typeof sp.ok === "string" ? OK[sp.ok] : undefined;
@@ -120,7 +123,13 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
         </section>
       )}
 
-      {/* 3. Cierre */}
+      {/* 3. Hasta dónde puede responder solo */}
+      <section className="card">
+        <div className="cab-sec"><h2>Hasta dónde puede responder solo</h2><span className="suave">últimos 14 días</span></div>
+        <Autonomia datos={au} faseTope={c.fase_tope} />
+      </section>
+
+      {/* 4. Cierre */}
       <section className="card">
         <h2>Cierre</h2>
         {!ci ? (
@@ -159,9 +168,9 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
         )}
       </section>
 
-      {/* 4. Cuello de botella */}
+      {/* 5. Dónde se pierden los leads */}
       <section className="card">
-        <h2>Dónde se pierden los leads</h2>
+        <div className="cab-sec"><h2>Dónde se pierden los leads</h2>{em && <span className="suave">{f0(em.leads)} leads · 28 días</span>}</div>
         {!em ? (
           <p className="vacio">Todavía no hay datos suficientes.</p>
         ) : (
@@ -177,7 +186,6 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
                 ...(ci?.sinVentas ? [] : [{ nombre: "Compran", n: em.compran.n, pct: em.compran.pct, pasa: em.compran.pasa, compran: true }]),
               ]}
             />
-            <p className="suave">Porcentaje de los {f0(em.leads)} leads atendidos en los últimos 28 días que llega a cada escalón.</p>
             {rp && (
               <div className="sep">
                 <div className="lineas"><span>Una persona tarda en contestar</span><b className={rp.mala ? "mal" : ""}>{f1(rp.min)} min</b></div>
