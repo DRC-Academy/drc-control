@@ -13,6 +13,7 @@ import { refrescar } from "@/app/acciones";
 import BotonConfirmar from "@/components/BotonConfirmar";
 import AutoRefresco from "@/components/AutoRefresco";
 import Flash from "@/components/Flash";
+import Funnel from "@/components/Funnel";
 import { cambiarEstado } from "./acciones";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +50,7 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
   const fallo = typeof sp.error === "string" ? sp.error : undefined;
   const hm = madridPartes(ahora).hm;
 
-  const reglaGrupo = "Responderá solo al " + (c.grupo_pct ?? 0) + " % de los leads nuevos, hasta " + describeFase(c.fase_tope) + ", y después pasa el chat a una persona.";
+  const reglaGrupo = "El bot enviará los mensajes él mismo al " + (c.grupo_pct ?? 0) + " % de los leads nuevos, hasta " + describeFase(c.fase_tope) + ", y después pasa el chat a una persona. A los demás leads se les sigue sugiriendo.";
   const sobrePrueba = envioReal ? " Enviará mensajes de verdad." : " De momento el bot está en modo prueba: no envía mensajes reales.";
   const confirmar = (cuando: string) => "¿Encender las respuestas automáticas " + cuando + "? " + reglaGrupo + sobrePrueba;
 
@@ -91,7 +92,7 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
             </div>
             <p className="linea">
               {!encendido ? (
-                <><b>Apagadas.</b> El bot solo sugiere y una persona envía.</>
+                <><b>Apagadas.</b> El bot no envía nada: sugiere y una persona envía.</>
               ) : pa.activo ? (
                 <><b>Encendidas.</b> {describeProg(c)}.</>
               ) : (
@@ -99,7 +100,7 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
               )}
               {encendido && !leido && <span className="suave"> El bot aún no ha leído el cambio.</span>}
             </p>
-            {encendido && <p className="suave">{reglaGrupo}</p>}
+            <p className="suave">{encendido ? reglaGrupo : "Es el interruptor del bot que envía los mensajes. Las sugerencias para el equipo están siempre activas."}</p>
             <div className="chips">
               {RAPIDOS.map((r) => (
                 <BotonConfirmar key={r} type="submit" name="accion" value={r} className="chip-btn" mensaje={confirmar(DURACION[r])} disabled={!mandos}>
@@ -170,22 +171,13 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
                 ? <>El mayor corte está de <b>{em.peor.de}</b> a <b>{em.peor.a}</b>: solo pasa el {p0(em.peor.pasa)}.</>
                 : "Todavía no hay un corte claro en el embudo."}
             </p>
-            <div className="pasos">
-              {em.pasos.map((p) => (
-                <div key={p.nombre} className={"paso" + (p.peor ? " peor" : "")}>
-                  <span>{p.nombre}</span>
-                  <div className="pista"><i style={{ width: Math.max(0, Math.min(100, p.pct * 100)) + "%" }} /></div>
-                  <span className="n">{f0(p.n)}</span>
-                </div>
-              ))}
-              {!ci?.sinVentas && (
-                <div className="paso compran">
-                  <span>Compran</span>
-                  <div className="pista"><i style={{ width: Math.max(0, Math.min(100, (em.ventas / em.leads) * 100)) + "%" }} /></div>
-                  <span className="n">{f0(em.ventas)}</span>
-                </div>
-              )}
-            </div>
+            <Funnel
+              escalones={[
+                ...em.pasos.map((x) => ({ nombre: x.nombre, n: x.n, pct: x.pct, pasa: x.pasa, peor: x.peor })),
+                ...(ci?.sinVentas ? [] : [{ nombre: "Compran", n: em.compran.n, pct: em.compran.pct, pasa: em.compran.pasa, compran: true }]),
+              ]}
+            />
+            <p className="suave">Porcentaje de los {f0(em.leads)} leads atendidos en los últimos 28 días que llega a cada escalón.</p>
             {rp && (
               <div className="sep">
                 <div className="lineas"><span>Una persona tarda en contestar</span><b className={rp.mala ? "mal" : ""}>{f1(rp.min)} min</b></div>

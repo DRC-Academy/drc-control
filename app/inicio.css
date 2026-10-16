@@ -56,14 +56,18 @@
 /* embudo */
 .titular{margin:0;font-size:1.02rem;line-height:1.4}
 .titular b{font-weight:650}
-.pasos{display:flex;flex-direction:column;gap:9px}
-.paso{display:grid;grid-template-columns:6.4rem 1fr 3.4rem;gap:10px;align-items:center;font-size:.92rem}
-.paso .pista{height:10px;border-radius:999px;background:var(--rejilla);overflow:hidden}
-.paso .pista i{display:block;height:100%;border-radius:999px;background:var(--acento);min-width:3px}
-.paso.peor .pista i{background:var(--mal)}
-.paso.peor span:first-child,.paso.peor .n{color:var(--mal);font-weight:650}
-.paso.compran .pista i{background:var(--ok)}
-.paso .n{text-align:right;font-variant-numeric:tabular-nums}
+.funnel{display:flex;flex-direction:column}
+.f-fila{display:grid;grid-template-columns:5.2rem 1fr 3.4rem;gap:10px;align-items:center}
+.f-nombre{font-size:.9rem}
+.f-pct{text-align:right;font-weight:650;font-variant-numeric:tabular-nums;font-size:.95rem}
+.f-pista{display:flex;justify-content:center;height:34px}
+.f-barra{display:block;height:100%;border-radius:8px;background:var(--acento);min-width:6px}
+.f-compran .f-barra{background:var(--ok)}
+.f-con{height:18px}
+.f-puente{height:100%;background:color-mix(in srgb,var(--acento) 20%,transparent)}
+.f-pasa{text-align:right;font-size:.74rem;color:var(--fg2);white-space:nowrap}
+.f-con.peor .f-puente{background:color-mix(in srgb,var(--mal) 42%,transparent)}
+.f-con.peor .f-pasa{color:var(--mal);font-weight:650}
 .sep{border-top:1px solid var(--linea);padding-top:14px;display:flex;flex-direction:column;gap:3px}
 .lineas{display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:.98rem}
 .lineas b{font-weight:650;font-variant-numeric:tabular-nums}
@@ -120,6 +124,7 @@
 .sticky-guardar .boton-suave{box-shadow:0 6px 20px rgba(0,0,0,.18)}
 
 @media (max-width:420px){
-  .paso{grid-template-columns:5.4rem 1fr 3rem;gap:8px}
+  .f-fila{grid-template-columns:4.6rem 1fr 3.1rem;gap:8px}
+  .f-nombre{font-size:.84rem}
   .num{font-size:2.5rem}
 }

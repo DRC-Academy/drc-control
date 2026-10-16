@@ -23,6 +23,7 @@ test("el embudo marca el paso donde más leads se pierden", () => {
   const e = embudo(lleno(), alumnos)!;
   assert.equal(e.leads, 100);
   assert.equal(e.ventas, 10);
+  assert.deepEqual(e.compran, { n: 10, pct: 0.1, pasa: 0.5 });   // 10 de los 100 leads; la mitad de los 20 que llegan a cierre
   assert.deepEqual(e.pasos.map((p) => p.n), [100, 80, 30, 25, 20]);
   assert.deepEqual(e.pasos.map((p) => p.nombre), ["Cualificación", "Explicación", "Precio", "Horario", "Cierre"]);
   assert.equal(e.pasos[0].pasa, null);

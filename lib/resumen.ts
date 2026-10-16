@@ -40,6 +40,7 @@ export function cierre(filas: Fila[], alumnos: Set<number>): Cierre | null {
 export type Paso = { nombre: string; n: number; pct: number; pasa: number | null; peor: boolean };
 export type Embudo = {
   leads: number; ventas: number; pasos: Paso[];
+  compran: { n: number; pct: number; pasa: number | null };   // el último escalón: leads que hoy son Alumno
   peor: { de: string; a: string; pasa: number } | null;
   desde: string; hasta: string;
 };
@@ -59,7 +60,9 @@ export function embudo(filas: Fila[], alumnos: Set<number>): Embudo | null {
     if (reach[i - 1] >= MIN_PASO && pasos[i].pasa != null && (k < 0 || (pasos[i].pasa as number) < (pasos[k].pasa as number))) k = i;
   }
   if (k >= 0) pasos[k].peor = true;
-  return { leads, ventas: S.ventas, pasos, peor: k >= 0 ? { de: pasos[k - 1].nombre, a: pasos[k].nombre, pasa: pasos[k].pasa as number } : null, desde, hasta: max };
+  const ultimo = reach[reach.length - 1];
+  const compran = { n: S.ventas, pct: S.ventas / leads, pasa: ultimo ? S.ventas / ultimo : null };
+  return { leads, ventas: S.ventas, pasos, compran, peor: k >= 0 ? { de: pasos[k - 1].nombre, a: pasos[k].nombre, pasa: pasos[k].pasa as number } : null, desde, hasta: max };
 }
 
 export type RespuestaPersonas = { min: number; limite: number; pct10: number | null; mala: boolean };

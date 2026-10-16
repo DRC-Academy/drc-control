@@ -92,23 +92,6 @@ export async function guardarAjustes(formData: FormData): Promise<void> {
   redirect("/ajustes?ok=guardado");
 }
 
-/** Apaga el bot por completo: ni sugiere ni responde. Pide confirmación (la rellena el navegador tras aceptar el aviso). */
-export async function pararBot(formData: FormData): Promise<void> {
-  await exigirMandos();
-  if (formData.get("confirmo") !== "on") fallo("Hace falta confirmar para apagar el bot por completo.");
-  const actual = (await leerJson<Control>("control.json"))?.data ?? null;
-  const nuevo: Control = { ...JSON.parse(JSON.stringify(actual || CONTROL_DEFECTO)), modo: "apagado" };
-  nuevo.actualizado = { at: new Date().toISOString(), por: "mandos" };
-  delete nuevo.autonomo_desde;
-  delete nuevo.nota;
-  try {
-    await guardarControl(nuevo, describeCambio(actual, nuevo), "mandos");
-  } catch (e) {
-    fallo("No se pudo guardar: " + (e as Error).message.slice(0, 160));
-  }
-  redirect("/?ok=apagado");
-}
-
 export async function guardarCorreccionAccion(formData: FormData): Promise<void> {
   await exigirMandos();
   const texto = String(formData.get("texto") || "").trim().slice(0, 1000);

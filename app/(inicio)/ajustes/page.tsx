@@ -6,9 +6,8 @@ import { NOMBRE } from "@/lib/analisis";
 import { MAX_FRANJAS, HORARIO_BOT, activa, caeFueraDeHorario, describir } from "@/lib/programacion";
 import { aDatetimeLocal, fmtFecha, madridPartes } from "@/lib/formato";
 import { salir } from "@/app/acciones";
-import BotonConfirmar from "@/components/BotonConfirmar";
 import Flash from "@/components/Flash";
-import { guardarAjustes, guardarCorreccionAccion, pararBot } from "./acciones";
+import { guardarAjustes, guardarCorreccionAccion } from "./acciones";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +50,7 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
 
       <form action={guardarAjustes} className="card" id="programacion">
         <h2>Programación</h2>
-        <p className="linea">{describir(pr)}. <span className="suave">Ahora mismo (Madrid, {madridPartes(ahora).hm}): {act.activo ? "dentro, " + act.motivo : "fuera, " + act.motivo}.</span></p>
+        <p className="linea">{describir(pr)}. <span className="suave">Ahora mismo (Madrid, {madridPartes(ahora).hm}): {act.activo ? "dentro, " + act.motivo : act.motivo}.</span></p>
         <div className="prog sec">
           <div className="seg" role="radiogroup" aria-label="Tipo de programación">
             {TIPOS.map(([v, t]) => (
@@ -100,7 +99,7 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
               <label className="campo">Hasta<input type="datetime-local" name="ventana_hasta" defaultValue={aDatetimeLocal(pr.tipo === "ventana" ? pr.hasta : undefined)} disabled={dis} /></label>
             </div>
           </div>
-          <p className="suave">Hora de Madrid. Fuera de la programación el bot vuelve a solo sugerir.</p>
+          <p className="suave">Hora de Madrid. Fuera de la programación el bot no envía nada: solo sugiere, como siempre.</p>
           {caeFueraDeHorario(pr, ahora) && (
             <p className="prueba">Parte de esta programación cae fuera del horario en que el bot actúa ({HORARIO_BOT.desde} a {HORARIO_BOT.hasta}, Madrid): fuera de ese horario no hará nada aunque esté programado.</p>
           )}
@@ -188,15 +187,6 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
           <Link href="/auditoria">Auditoría</Link>
           <Link href="/comparar">Comparar periodos</Link>
         </div>
-      </section>
-
-      <section className="card">
-        <h2>Apagar el bot</h2>
-        <p className="suave">Ni sugiere respuestas ni responde. Se vuelve a encender desde la pantalla principal.</p>
-        <form action={pararBot}>
-          <input type="hidden" name="confirmo" defaultValue="" />
-          <BotonConfirmar type="submit" className="boton-suave peligro" mensaje="¿Apagar el bot por completo? Dejará de sugerir respuestas y de responder." disabled={dis}>Apagar el bot por completo</BotonConfirmar>
-        </form>
       </section>
 
       <form action={salir} className="pie">
