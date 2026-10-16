@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Centro de control del bot de ventas",
-  description: "DRC Academy: salud, preparación por fase, grupo de control, auditoría y panel del bot de ventas.",
+  title: "Bot de ventas",
+  description: "DRC Academy: estado del bot de ventas, respuestas automáticas, cierre y dónde se pierden los leads.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

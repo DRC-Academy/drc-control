@@ -83,7 +83,7 @@ export function describeCambio(a: Control | null, b: Control): string {
   if (!a || a.modo !== b.modo) partes.push("modo " + (a ? M[a.modo] + " → " : "") + M[b.modo]);
   if (!a || a.fase_tope !== b.fase_tope) partes.push("fase tope " + (NOMBRE[b.fase_tope] || b.fase_tope).toLowerCase());
   if (!a || a.grupo_pct !== b.grupo_pct) partes.push("grupo " + b.grupo_pct + " %");
-  if (!a || JSON.stringify(a.programacion) !== JSON.stringify(b.programacion)) partes.push("programación: " + describeProg(b));
+  if (!a || JSON.stringify(a.programacion) !== JSON.stringify(b.programacion)) partes.push("programación: " + describir(b.programacion));
   if (!a || JSON.stringify(a.reglas) !== JSON.stringify(b.reglas)) partes.push("reglas de traspaso cambiadas");
   return partes.join("; ") || "sin cambios";
 }

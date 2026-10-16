@@ -2,6 +2,19 @@
 
 App interna de DRC Academy (Next.js en Vercel) para ver la salud del bot de ventas, decidir hasta qué fase puede responder solo, seguir el grupo de control, auditar día a día y manejar el panel (modo, fase tope, grupo, programación, reglas de traspaso, correcciones).
 
+## Pantalla principal y Ajustes (16/10/2026)
+
+La portada (`/`) es una sola pantalla pensada para el móvil, con lo esencial de un vistazo:
+1. **Estado del bot**: funciona bien, va lento, con problemas, fuera de horario o apagado. Sale de lo que deja el bot en la rama `estado` (`salud/AAAA-MM-DD.jsonl`, `vigilante.json`, `rescates.json`) y se calcula en `lib/estado.ts` (puro, con tests). Si no puede leerlo, lo dice en vez de dar el bot por sano.
+2. **Respuestas automáticas**: interruptor, atajos (1 hora, 2 horas, 4 horas, hoy, fin de semana) y enlace a la programación. Encender pide confirmación; apagar no. Usa lo guardado en Ajustes (grupo, fase tope, programación).
+3. **Cierre**: leads que acaban comprando (hoy son Alumno en Respond) entre los de los últimos 28 días. Con el modo autónomo en marcha compara al bot solo con el grupo de control (`lib/resumen.ts`).
+4. **Dónde se pierden los leads**: embudo con el paso donde más se cae marcado, y cuánto tarda una persona en contestar frente al límite de 10 minutos.
+
+`/ajustes` reúne lo demás: programación completa (horario semanal, hasta una fecha, entre dos fechas, siempre, parada), fase tope y grupo, reglas de traspaso, correcciones al bot, historial, apagar el bot por completo y enlaces al análisis detallado (`/salud`, `/preparacion`, `/grupo`, `/auditoria`, `/comparar`), que siguen como estaban. `/panel` redirige a `/ajustes`.
+
+La pantalla se refresca sola cada minuto. Pruebas: `npm test` (programación, estado, cierre, embudo y atajos).
+
+
 Sin base de datos: el estado del panel y las métricas viven en la rama `estado` del repositorio del bot (`drcacademycourses/drc-respond`). La app lee `metricas/*.jsonl` y escribe `control.json`, `control-historial.json` y `control-correcciones.json` con commits. El bot deja su acuse en `control-aplicado.json`. Git es el registro.
 
 ## Variables de entorno (en Vercel, Settings, Environment Variables)

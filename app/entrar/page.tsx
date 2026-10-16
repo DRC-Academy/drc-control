@@ -3,7 +3,7 @@ import { entrar } from "@/app/acciones";
 export default async function Entrar({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const error = typeof sp.error === "string" ? sp.error : "";
-  const a = typeof sp.a === "string" ? sp.a : "/salud";
+  const a = typeof sp.a === "string" ? sp.a : "/";
   const sinClaves = !process.env.CLAVE_MANDOS && !process.env.CLAVE_VISTA;
   return (
     <main>

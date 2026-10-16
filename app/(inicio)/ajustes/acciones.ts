@@ -4,18 +4,18 @@ import { redirect } from "next/navigation";
 import { verificarSesion } from "@/lib/sesion";
 import { leerJson } from "@/lib/github";
 import { guardarControl, guardarCorreccion, describeCambio, CONTROL_DEFECTO, REGLAS, FASES_TOPE, type Control, type FaseTope } from "@/lib/control";
-import { MAX_FRANJAS, esHora, sigueVigente, type Franja, type Programacion } from "@/lib/programacion";
-import { madridEn, madridPartes } from "@/lib/formato";
+import { MAX_FRANJAS, esHora, type Franja, type Programacion } from "@/lib/programacion";
+import { madridEn } from "@/lib/formato";
 
 async function exigirMandos(): Promise<void> {
   const c = await cookies();
   const s = await verificarSesion(c.get("drc_sesion")?.value);
-  if (!s) redirect("/entrar?a=/panel");
-  if (s.rol !== "mandos") redirect("/panel?error=" + encodeURIComponent("Solo quien entra con la clave de mandos puede cambiar el panel."));
+  if (!s) redirect("/entrar?a=/ajustes");
+  if (s.rol !== "mandos") redirect("/ajustes?error=" + encodeURIComponent("Solo quien entra con la clave de mandos puede cambiar los ajustes."));
 }
 
 function fallo(msg: string): never {
-  redirect("/panel?error=" + encodeURIComponent(msg));
+  redirect("/ajustes?error=" + encodeURIComponent(msg));
 }
 
 /** "AAAA-MM-DDTHH:MM" escrito en hora de Madrid a ISO UTC. */
@@ -25,6 +25,7 @@ function deLocal(valor: string): string | null {
   return madridEn(Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5])).toISOString();
 }
 
+const mismoMinuto = (a?: string, b?: string) => !!a && !!b && Math.abs(new Date(a).getTime() - new Date(b).getTime()) < 60000;
 const ATAJOS: Record<string, number[]> = { todos: [1, 2, 3, 4, 5, 6, 7], lv: [1, 2, 3, 4, 5], ls: [1, 2, 3, 4, 5, 6], finde: [6, 7] };
 
 function leerProgramacion(fd: FormData, ahora: Date, base: Programacion): Programacion {
@@ -33,15 +34,22 @@ function leerProgramacion(fd: FormData, ahora: Date, base: Programacion): Progra
   if (tipo === "apagado") return { tipo: "apagado", zona: "Europe/Madrid" };
   if (tipo === "hasta") {
     const h = deLocal(String(fd.get("prog_hasta") || ""));
-    if (!h) fallo("Pon la fecha y la hora de fin en Hasta una fecha y hora.");
-    if (new Date(h) <= ahora) fallo("La fecha y hora de fin ya pasó.");
+    if (!h) fallo("Pon la fecha y la hora de fin.");
+    // una fecha ya caducada que no se ha tocado no impide guardar otros ajustes
+    if (new Date(h) <= ahora) {
+      if (base.tipo === "hasta" && mismoMinuto(h, base.hasta)) return base;
+      fallo("La fecha y hora de fin ya pasó.");
+    }
     return { tipo: "hasta", hasta: h, zona: "Europe/Madrid" };
   }
   if (tipo === "ventana") {
     const d = deLocal(String(fd.get("ventana_desde") || "")), h = deLocal(String(fd.get("ventana_hasta") || ""));
     if (!d || !h) fallo("Entre dos fechas: pon el inicio y el fin, con fecha y hora.");
     if (new Date(h) <= new Date(d)) fallo("Entre dos fechas: el fin tiene que ser posterior al inicio.");
-    if (new Date(h) <= ahora) fallo("Entre dos fechas: ese tramo ya terminó.");
+    if (new Date(h) <= ahora) {
+      if (base.tipo === "ventana" && mismoMinuto(d, base.desde) && mismoMinuto(h, base.hasta)) return base;
+      fallo("Entre dos fechas: ese tramo ya terminó.");
+    }
     return { tipo: "ventana", desde: d, hasta: h, zona: "Europe/Madrid" };
   }
   const franjas: Franja[] = [];
@@ -56,59 +64,49 @@ function leerProgramacion(fd: FormData, ahora: Date, base: Programacion): Progra
     if (desde === hasta && desde !== "00:00") fallo(`Franja ${i}: el inicio y el fin no pueden ser la misma hora (00:00 a 00:00 es el día entero).`);
     franjas.push({ dias, desde, hasta });
   }
-  if (!franjas.length) fallo("Horario por días: pon al menos una franja con días y horas.");
+  if (!franjas.length) fallo("Horario semanal: pon al menos una franja con días y horas.");
   return { tipo: "franjas", franjas, zona: "Europe/Madrid" };
 }
 
-const RAPIDOS = ["r1h", "r2h", "r4h", "rhoy", "rfinde"];
-
-export async function guardarPanel(formData: FormData): Promise<void> {
+/** Guarda programación, grupo, fase tope y reglas. No enciende ni apaga: eso se hace en la pantalla principal. */
+export async function guardarAjustes(formData: FormData): Promise<void> {
   await exigirMandos();
   const ahora = new Date();
-  const accion = String(formData.get("accion") || "guardar");
   const actual = (await leerJson<Control>("control.json"))?.data ?? null;
   const base: Control = JSON.parse(JSON.stringify(actual || CONTROL_DEFECTO));
   const nuevo: Control = { ...base };
-
   const ft = String(formData.get("fase_tope") || base.fase_tope);
   nuevo.fase_tope = (FASES_TOPE as readonly string[]).includes(ft) ? (ft as FaseTope) : base.fase_tope;
   nuevo.grupo_pct = Math.max(0, Math.min(100, Math.round(Number(formData.get("grupo_pct")) || 0)));
   const reglas: Record<string, boolean> = {};
   REGLAS.forEach(([k]) => { reglas[k] = k === "fase_tope" ? true : formData.get("regla_" + k) === "on"; });
   nuevo.reglas = reglas;
-
-  const confirmado = formData.get("confirmo") === "on";
-  const pideConfirmar = accion === "encender" || accion === "apagado_total" || RAPIDOS.includes(accion);
-  if (pideConfirmar && !confirmado) fallo("Marca la casilla de confirmación antes de cambiar el estado del bot.");
-
-  let prog: Programacion;
-  if (RAPIDOS.includes(accion)) {
-    nuevo.modo = "autonomo";
-    if (accion === "r1h" || accion === "r2h" || accion === "r4h") prog = { tipo: "hasta", hasta: new Date(ahora.getTime() + Number(accion[1]) * 3600e3).toISOString(), zona: "Europe/Madrid", q: accion.slice(1) };
-    else if (accion === "rhoy") { const o = madridPartes(ahora); prog = { tipo: "hasta", hasta: madridEn(o.y, o.m, o.d, 21, 0).toISOString(), zona: "Europe/Madrid", q: "hoy" }; if (new Date(prog.hasta as string) <= ahora) fallo("Ya pasaron las 21:00 de hoy."); }
-    else prog = { tipo: "franjas", franjas: [{ dias: [6, 7], desde: "00:00", hasta: "00:00" }], zona: "Europe/Madrid" };
-  } else {
-    prog = leerProgramacion(formData, ahora, base.programacion);
-    if (accion === "encender") {
-      nuevo.modo = "autonomo";
-      if (!sigueVigente(prog, ahora)) fallo("Para encender, elige cuándo responde: la programación está parada o ya terminó.");
-    } else if (accion === "apagar") nuevo.modo = "propone";
-    else if (accion === "apagado_total") nuevo.modo = "apagado";
-  }
-  nuevo.programacion = prog;
-
-  const at = ahora.toISOString();
-  nuevo.actualizado = { at, por: "mandos" };
-  if (nuevo.modo === "autonomo") nuevo.autonomo_desde = actual?.modo === "autonomo" && actual.autonomo_desde ? actual.autonomo_desde : at;
-  else delete nuevo.autonomo_desde;
+  nuevo.programacion = leerProgramacion(formData, ahora, base.programacion);
+  nuevo.actualizado = { at: ahora.toISOString(), por: "mandos" };
   delete nuevo.nota;
-  const etiqueta = accion === "encender" || RAPIDOS.includes(accion) ? "encendido" : accion === "apagar" ? "apagado" : accion === "apagado_total" ? "parado" : "guardado";
   try {
     await guardarControl(nuevo, describeCambio(actual, nuevo), "mandos");
   } catch (e) {
     fallo("No se pudo guardar: " + (e as Error).message.slice(0, 160));
   }
-  redirect("/panel?ok=" + etiqueta);
+  redirect("/ajustes?ok=guardado");
+}
+
+/** Apaga el bot por completo: ni sugiere ni responde. Pide confirmación (la rellena el navegador tras aceptar el aviso). */
+export async function pararBot(formData: FormData): Promise<void> {
+  await exigirMandos();
+  if (formData.get("confirmo") !== "on") fallo("Hace falta confirmar para apagar el bot por completo.");
+  const actual = (await leerJson<Control>("control.json"))?.data ?? null;
+  const nuevo: Control = { ...JSON.parse(JSON.stringify(actual || CONTROL_DEFECTO)), modo: "apagado" };
+  nuevo.actualizado = { at: new Date().toISOString(), por: "mandos" };
+  delete nuevo.autonomo_desde;
+  delete nuevo.nota;
+  try {
+    await guardarControl(nuevo, describeCambio(actual, nuevo), "mandos");
+  } catch (e) {
+    fallo("No se pudo guardar: " + (e as Error).message.slice(0, 160));
+  }
+  redirect("/?ok=apagado");
 }
 
 export async function guardarCorreccionAccion(formData: FormData): Promise<void> {
@@ -120,5 +118,5 @@ export async function guardarCorreccionAccion(formData: FormData): Promise<void>
   } catch (e) {
     fallo("No se pudo guardar: " + (e as Error).message.slice(0, 160));
   }
-  redirect("/panel?ok=correccion");
+  redirect("/ajustes?ok=correccion");
 }

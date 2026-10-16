@@ -6,17 +6,17 @@ import { firmarSesion, rolDeClave, verificarSesion } from "@/lib/sesion";
 
 export async function entrar(formData: FormData): Promise<void> {
   const clave = String(formData.get("clave") || "");
-  const a = String(formData.get("a") || "/salud");
+  const a = String(formData.get("a") || "/");
   const rol = rolDeClave(clave);
   if (!rol) {
     await new Promise((r) => setTimeout(r, 800));
-    redirect("/entrar?error=1" + (a && a !== "/salud" ? "&a=" + encodeURIComponent(a) : ""));
+    redirect("/entrar?error=1" + (a && a !== "/" ? "&a=" + encodeURIComponent(a) : ""));
   }
   const token = await firmarSesion(rol);
   if (!token) redirect("/entrar?error=2");
   const c = await cookies();
   c.set("drc_sesion", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 30 * 86400 });
-  redirect(a.startsWith("/") && !a.startsWith("//") ? a : "/salud");
+  redirect(a.startsWith("/") && !a.startsWith("//") ? a : "/");
 }
 
 export async function salir(): Promise<void> {
@@ -32,5 +32,6 @@ export async function refrescar(ruta: string): Promise<void> {
   revalidateTag("metricas");
   revalidateTag("control");
   revalidateTag("alumnos");
-  redirect(ruta.startsWith("/") && !ruta.startsWith("//") ? ruta : "/salud");
+  revalidateTag("salud");
+  redirect(ruta.startsWith("/") && !ruta.startsWith("//") ? ruta : "/");
 }
