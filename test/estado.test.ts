@@ -93,7 +93,7 @@ test("los leads de la noche no cuentan para lo que tarda: ni para la media ni pa
   const noche = calcularSalud(entrada({ filas: [fila(100, "ok", { lat: 35642 }), fila(200, "ok", { lat: 37089 }), fila(300, "ok", { lat: 37935 }), fila(400, "ok", { lat: 90 }), fila(500, "ok", { lat: 120 })] }));
   assert.equal(noche.nivel, "ok");
   assert.equal(noche.lat_s, 105);
-  assert.match(noche.detalle, /tarda 105 s/);
+  assert.match(noche.detalle, /tarda 1 min 45 s/);
   const solo = calcularSalud(entrada({ filas: [fila(100, "ok", { lat: 35642 }), fila(200, "ok", { lat: 37089 })] }));
   assert.equal(solo.lat_s, null);
   assert.doesNotMatch(solo.detalle, /tarda/);
