@@ -147,3 +147,21 @@ test("solo los atajos conocidos se aceptan", () => {
   assert.equal(esRapido("r9h"), false);
   assert.equal(esRapido("encender"), false);
 });
+
+// ---- por qué no hay ventas (16/10/2026): el aviso dice el motivo real ----
+import { motivoSinVentas } from "../lib/sinVentas";
+
+test("sin token se pide ponerlo en Vercel", () => {
+  assert.match(motivoSinVentas({ token: false, error: null }), /falta conectar Respond.*RESPONDIO_TOKEN en Vercel/);
+});
+
+test("con token pero con fallo se dice el fallo y que se compruebe el token", () => {
+  const m = motivoSinVentas({ token: true, error: "HTTP 401" });
+  assert.match(m, /HTTP 401/);
+  assert.match(m, /sea el vigente/);
+  assert.doesNotMatch(m, /falta conectar/);
+});
+
+test("con token y sin fallo pero sin alumnos no se culpa al token", () => {
+  assert.equal(motivoSinVentas({ token: true, error: null }), "Respond no tiene ningún contacto en la etapa Alumno.");
+});

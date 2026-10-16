@@ -1,4 +1,5 @@
 import { cargar } from "@/lib/cargar";
+import { motivoSinVentas } from "@/lib/sinVentas";
 import { stats, sig, usoDiario, FASES, EMBUDO_N, maxFecha } from "@/lib/analisis";
 import { f0, p0, p1, fmtDia, addDias } from "@/lib/formato";
 import Chip from "@/components/Chip";
@@ -12,7 +13,7 @@ const esFecha = (s: unknown): s is string => typeof s === "string" && /^\d{4}-\d
 
 export default async function Comparar({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
-  const { filas, alumnos, panel, error } = await cargar();
+  const { filas, alumnos, respond, panel, error } = await cargar();
   const max = maxFecha(filas);
   const preset = sp.preset === "mes" || sp.preset === "cus" ? sp.preset : "sem";
   let a1 = "", a2 = "", b1 = "", b2 = "";
@@ -37,7 +38,7 @@ export default async function Comparar({ searchParams }: { searchParams: Promise
     <>
       <Pildoras control={panel.control} aplicado={panel.aplicado} sha={panel.sha} maxFecha={max} />
       {error && <Aviso tono="mal" texto={"No se han podido leer las métricas del bot: " + error} />}
-      {!alumnos.size && <Aviso tono="aviso" texto="Sin RESPONDIO_TOKEN en Vercel las ventas salen a 0: la app no puede saber qué contactos son hoy alumnos." />}
+      {!alumnos.size && <Aviso tono="aviso" texto={"Las ventas salen a 0: " + motivoSinVentas(respond)} />}
       <div className="tarjeta">
         <div><h2>Qué periodos comparar</h2></div>
         <form method="get" className="ctl">

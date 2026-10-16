@@ -1,4 +1,5 @@
 import { cargar } from "@/lib/cargar";
+import { motivoSinVentas } from "@/lib/sinVentas";
 import { grupos, periodos, stats, NOMBRE, maxFecha } from "@/lib/analisis";
 import { CONTROL_DEFECTO, describeProg } from "@/lib/control";
 import { f0, f1, p0, p1, fmtFecha, addDias } from "@/lib/formato";
@@ -8,7 +9,7 @@ import Aviso from "@/components/Aviso";
 export const dynamic = "force-dynamic";
 
 export default async function Grupo() {
-  const { filas, alumnos, panel, error } = await cargar();
+  const { filas, alumnos, respond, panel, error } = await cargar();
   const c = panel.control || CONTROL_DEFECTO;
   const max = maxFecha(filas);
   const [A] = periodos(filas);
@@ -60,7 +61,7 @@ export default async function Grupo() {
         <p className="nota">La cuenta de leads sale de los contactos nuevos de ventas de los últimos 7 días. La estimación usa la fase a la que hoy llega cada lead y busca ver una diferencia de 10 puntos en "llegan al precio" con una confianza del 95 %. Con pocos leads en el grupo el resultado tarda meses: mejor un porcentaje alto y pocas semanas que al revés.</p>
       </div>
       <div className="tarjeta">
-        <div><h2>Resultados: bot solo frente a persona</h2><p className="nota">Se rellena cuando el modo autónomo esté activo y el bot marque cada lead con su grupo. {alumnos.size ? "" : "Sin RESPONDIO_TOKEN en Vercel, las ventas salen a 0: la app no puede saber qué contactos son hoy alumnos."}</p></div>
+        <div><h2>Resultados: bot solo frente a persona</h2><p className="nota">Se rellena cuando el modo autónomo esté activo y el bot marque cada lead con su grupo. {alumnos.size ? "" : "Las ventas salen a 0: " + motivoSinVentas(respond)}</p></div>
         {!G.length ? <p className="nota">Sin datos todavía: el bot aún no marca leads con grupo. Empieza cuando el modo autónomo se active y el bot lo aplique.</p> : (
           <>
             <table>

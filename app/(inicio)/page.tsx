@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { cargar } from "@/lib/cargar";
+import { motivoSinVentas } from "@/lib/sinVentas";
 import { verificarSesion } from "@/lib/sesion";
 import { leerSaludBot } from "@/lib/estadoServidor";
 import { cierre, embudo, respuestaPersonas } from "@/lib/resumen";
@@ -38,7 +39,7 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
   const ck = await cookies();
   const ses = await verificarSesion(ck.get("drc_sesion")?.value);
   const mandos = ses?.rol === "mandos";
-  const { filas, alumnos, panel, error } = await cargar();
+  const { filas, alumnos, respond, panel, error } = await cargar();
   const c = panel.control || CONTROL_DEFECTO;
   const salud = await leerSaludBot(c.modo);
   const ahora = new Date();
@@ -139,7 +140,7 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
         {!ci ? (
           <p className="vacio">Todavía no hay datos suficientes.</p>
         ) : ci.sinVentas ? (
-          <p className="vacio">No se puede medir: falta conectar Respond para saber qué leads acaban comprando (variable RESPONDIO_TOKEN en Vercel).</p>
+          <p className="vacio">No se puede medir: {motivoSinVentas(respond)}</p>
         ) : ci.bot ? (
           <>
             <div className="dos">
