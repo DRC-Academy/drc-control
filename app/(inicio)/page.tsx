@@ -8,13 +8,16 @@ import { CONTROL_DEFECTO, describeFase, describeProg, programada } from "@/lib/c
 import { RAPIDOS, ETIQUETA_RAPIDO, type Rapido } from "@/lib/rapidos";
 import { HORARIO_BOT, caeFueraDeHorario } from "@/lib/programacion";
 import { maxFecha } from "@/lib/analisis";
-import { f0, f1, fmtDia, p0, p1, madridPartes } from "@/lib/formato";
+import { f0, f1, fmtDia, hoyIso, p0, p1, madridPartes } from "@/lib/formato";
 import { refrescar } from "@/app/acciones";
 import BotonConfirmar from "@/components/BotonConfirmar";
 import AutoRefresco from "@/components/AutoRefresco";
 import Flash from "@/components/Flash";
 import Funnel from "@/components/Funnel";
 import Autonomia from "@/components/Autonomia";
+import ObjecionesResumen from "@/components/ObjecionesResumen";
+import { leerObjeciones } from "@/lib/objecionesServidor";
+import { objeciones as calcularObjeciones } from "@/lib/objeciones";
 import { autonomia } from "@/lib/autonomia";
 import { cambiarEstado } from "./acciones";
 
@@ -47,6 +50,7 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
   const em = embudo(filas, alumnos);
   const rp = respuestaPersonas(filas);
   const au = autonomia(filas);
+  const obj = calcularObjeciones(await leerObjeciones().catch(() => []), filas, alumnos, hoyIso());
   const encendido = c.modo === "autonomo";
   const apagado = c.modo === "apagado";
   const ok = typeof sp.ok === "string" ? OK[sp.ok] : undefined;
@@ -194,6 +198,12 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
             )}
           </>
         )}
+      </section>
+
+      {/* 6. Objeciones */}
+      <section className="card">
+        <div className="cab-sec"><h2>Objeciones</h2>{obj && <span className="suave">{f0(obj.leadsConObjecion)} leads</span>}</div>
+        <ObjecionesResumen datos={obj} />
       </section>
 
       <div className="pie">
