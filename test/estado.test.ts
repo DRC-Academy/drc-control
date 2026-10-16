@@ -89,6 +89,16 @@ test("va lento con la mediana por encima de 5 minutos y al menos 3 muestras", ()
   assert.equal(dos.nivel, "ok", "con dos muestras no se juzga");
 });
 
+test("los leads de la noche no cuentan para lo que tarda: ni para la media ni para decir que va lento", () => {
+  const noche = calcularSalud(entrada({ filas: [fila(100, "ok", { lat: 35642 }), fila(200, "ok", { lat: 37089 }), fila(300, "ok", { lat: 37935 }), fila(400, "ok", { lat: 90 }), fila(500, "ok", { lat: 120 })] }));
+  assert.equal(noche.nivel, "ok");
+  assert.equal(noche.lat_s, 105);
+  assert.match(noche.detalle, /tarda 105 s/);
+  const solo = calcularSalud(entrada({ filas: [fila(100, "ok", { lat: 35642 }), fila(200, "ok", { lat: 37089 })] }));
+  assert.equal(solo.lat_s, null);
+  assert.doesNotMatch(solo.detalle, /tarda/);
+});
+
 test("formato de tiempos", () => {
   assert.equal(dur(42), "42 s");
   assert.equal(dur(75), "75 s");

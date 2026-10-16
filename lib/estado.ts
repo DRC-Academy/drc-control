@@ -24,6 +24,7 @@ export const MIN_FALLOS = 3;          // fallos para dar un problema por cierto.
 export const PCT_FALLOS = 0.5;        // ...y que sean al menos la mitad de los turnos
 export const LENTA_S = 300;           // mediana a partir de la cual va lento (los mismos 5 minutos que el vigilante)
 export const MIN_MUESTRAS_LENTA = 3;
+export const LAT_MAX_S = 3 * 3600;    // una sugerencia que llega más de 3 h después del mensaje es un lead de la noche (se atiende al abrir): no cuenta para la velocidad
 export const ABRE_MIN = 8 * 60 + 30;  // el bot actúa de 8:30 a 21:00, hora de Madrid
 export const CIERRA_MIN = 21 * 60;
 
@@ -51,7 +52,7 @@ export function calcularSalud(e: EntradaSalud): SaludBot {
   const recientes = e.filas.filter((f) => f.ts >= ahoraS - VENTANA_S);
   const buenasRec = recientes.filter((f) => f.r === "ok" || f.r === "tarde");
   const fallosRec = recientes.filter((f) => f.r === "fallo");
-  const lats = buenasRec.map((f) => f.lat).filter((x): x is number => typeof x === "number");
+  const lats = buenasRec.map((f) => f.lat).filter((x): x is number => typeof x === "number" && x <= LAT_MAX_S);
   const lat = mediana(lats);
   const ultimaTs = buenas.length ? Math.max(...buenas.map((f) => f.ts)) : null;
   const ultima_s = ultimaTs == null ? null : Math.max(0, ahoraS - ultimaTs);
