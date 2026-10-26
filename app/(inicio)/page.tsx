@@ -20,6 +20,9 @@ import ObjecionesResumen from "@/components/ObjecionesResumen";
 import { leerObjeciones } from "@/lib/objecionesServidor";
 import { objeciones as calcularObjeciones } from "@/lib/objeciones";
 import { autonomia } from "@/lib/autonomia";
+import ParecidoDiego from "@/components/ParecidoDiego";
+import { leerParecido } from "@/lib/parecidoServidor";
+import { parecidoDiego } from "@/lib/parecido";
 import { cambiarEstado } from "./acciones";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +54,7 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
   const em = embudo(filas, alumnos);
   const rp = respuestaPersonas(filas);
   const au = autonomia(filas);
+  const par = parecidoDiego(await leerParecido().catch(() => []), hoyIso());
   const obj = calcularObjeciones(await leerObjeciones().catch(() => []), filas, alumnos, hoyIso());
   const encendido = c.modo === "autonomo";
   const apagado = c.modo === "apagado";
@@ -132,6 +136,12 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<R
       <section className="card">
         <div className="cab-sec"><h2>Hasta dónde puede responder solo</h2><span className="suave">últimos 14 días</span></div>
         <Autonomia datos={au} faseTope={c.fase_tope} />
+      </section>
+
+      {/* 3b. Cuánto se parece a Diego (26/10/2026) */}
+      <section className="card">
+        <div className="cab-sec"><h2>Cuánto se parece a ti</h2><span className="suave">últimos 7 días</span></div>
+        <ParecidoDiego datos={par} />
       </section>
 
       {/* 4. Cierre */}
