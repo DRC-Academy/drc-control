@@ -1,4 +1,4 @@
-import { f0, fmtDia, p0 } from "@/lib/formato";
+import { addDias, f0, fmtDia, p0 } from "@/lib/formato";
 import type { Parecido } from "@/lib/parecido";
 import { PARECIDO_ALTO } from "@/lib/parecido";
 import Grafica from "@/components/Grafica";
@@ -29,6 +29,25 @@ export default function ParecidoDiego({ datos }: { datos: Parecido | null }) {
           puntos={datos.semanas.map((s) => ({ x: s.x, y: s.y, detalle: [["Respuestas", f0(s.n)]] }))}
           fmt="pct" xfmt="semana" dominio={[0, 1]} etiqueta="Parecido a Diego por semana" alto={160}
         />
+      )}
+      {datos.semanas.length > 0 && (
+        <table className="tabla-sem">
+          <thead><tr><th>Semana</th><th>Respuestas</th><th>Parecido</th><th>Cambio</th></tr></thead>
+          <tbody>
+            {datos.semanas.map((s, i) => {
+              const antes = i > 0 ? datos.semanas[i - 1].y : null;
+              const dif = s.y != null && antes != null ? Math.round((s.y - antes) * 100) : null;
+              return (
+                <tr key={s.x}>
+                  <td>{fmtDia(s.x)} a {fmtDia(addDias(s.x, 6))}</td>
+                  <td>{f0(s.n)}</td>
+                  <td>{s.n ? p0(s.y) : "sin datos"}</td>
+                  <td className={dif == null ? "" : dif > 0 ? "bien" : dif < 0 ? "mal" : ""}>{dif == null ? "" : (dif > 0 ? "+" : "") + dif + " pts"}</td>
+                </tr>
+              );
+            }).reverse()}
+          </tbody>
+        </table>
       )}
       <p className="suave">Se compara el texto de la propuesta con el mensaje que enviaste a ese mismo mensaje del lead. El bot aprende cada noche de tus chats y la guía de tu estilo se ajusta sola.</p>
     </>

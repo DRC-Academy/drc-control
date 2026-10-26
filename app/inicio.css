@@ -169,3 +169,12 @@
 .o-desajuste:first-of-type{border-top:0;padding-top:0}
 .o-desajuste small{color:var(--fg2)}
 @media (max-width:420px){.o-fila{grid-template-columns:7.6rem 1fr 2.8rem;gap:8px;font-size:.84rem}}
+
+/* Parecido a Diego: comparativa semana a semana (26/10/2026) */
+.tabla-sem{width:100%;border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums;margin:6px 0}
+.tabla-sem th{font-weight:600;color:var(--fg2);text-align:left;padding:6px 4px;border-bottom:1px solid var(--linea)}
+.tabla-sem td{padding:6px 4px;border-bottom:1px solid var(--linea)}
+.tabla-sem th:not(:first-child),.tabla-sem td:not(:first-child){text-align:right}
+.tabla-sem .bien{color:var(--ok)}
+.tabla-sem .mal{color:var(--mal)}
+@media (max-width:420px){.tabla-sem{font-size:.82rem}}
